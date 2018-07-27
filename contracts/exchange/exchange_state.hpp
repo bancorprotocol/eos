@@ -76,6 +76,10 @@ namespace eosio {
       extended_asset convert_from_exchange( connector& c, extended_asset in );
       extended_asset convert( extended_asset from, extended_symbol to );
 
+      extended_asset convert_quick(extended_asset from, extended_symbol to);
+      extended_asset convert_quick_inv(extended_symbol from, extended_asset to);
+
+
       bool requires_margin_call( const exchange_state::connector& con )const;
       bool requires_margin_call()const;
 

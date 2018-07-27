@@ -37,7 +37,46 @@ namespace eosio {
 
       return extended_asset( out, c.balance.get_extended_symbol() );
    }
-
+   extended_asset exchange_state::convert_quick_inv(extended_symbol from, extended_asset to){
+      auto sell_symbol  = from;
+      auto to_symbol  = to.get_extended_symbol();
+      auto base_symbol  = base.balance.get_extended_symbol();
+      auto quote_symbol = quote.balance.get_extended_symbol();
+      
+      real_type balance_from = 0;
+      real_type balance_to = 0;
+      real_type amount_desired = to.amount;
+      if(sell_symbol == base_symbol && to_symbol == quote_symbol){
+         balance_from = base.balance.amount;
+         balance_to   = quote.balance.amount;
+      }
+      else if(sell_symbol == quote_symbol && to_symbol == base_symbol){
+         balance_from = quote.balance.amount;
+         balance_to   = base.balance.amount;
+      } else 
+	  eosio_assert( false, "invalid conversion" );
+      return extended_asset(int64_t(balance_from / (1.0 - amount_desired / balance_to) - balance_from), sell_symbol); 
+   }
+   extended_asset exchange_state::convert_quick(extended_asset from, extended_symbol to){
+      auto sell_symbol  = from.get_extended_symbol();
+      auto to_symbol  = to;
+      auto base_symbol  = base.balance.get_extended_symbol();
+      auto quote_symbol = quote.balance.get_extended_symbol();
+      
+      real_type amount_from = from.amount;
+      real_type balance_from = 0;
+      real_type balance_to = 0;
+      if(sell_symbol == base_symbol && to_symbol == quote_symbol){
+         balance_from = base.balance.amount;
+         balance_to   = quote.balance.amount;
+      }
+      else if(sell_symbol == quote_symbol && to_symbol == base_symbol){
+         balance_from = quote.balance.amount;
+         balance_to   = base.balance.amount;
+      }
+      else eosio_assert( false, "invalid conversion" );
+      return extended_asset(int64_t(amount_from / (balance_from + amount_from) * balance_to), to_symbol);
+   }
    extended_asset exchange_state::convert( extended_asset from, extended_symbol to ) {
       auto sell_symbol  = from.get_extended_symbol();
       auto ex_symbol    = supply.get_extended_symbol();
